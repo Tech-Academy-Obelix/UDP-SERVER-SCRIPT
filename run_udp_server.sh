@@ -1,17 +1,20 @@
 #!/bin/bash
 
-REPO_URL="https://github.com/Tech-Academy-Obelix/HomeworkPlatform.git"
-TARGET_DIR="HomeworkPlatform"
-PID_FILE="platform.pid"
-
+BACKEND_REPO="https://github.com/Tech-Academy-Obelix/HomeworkPlatform.git"
+FRONTEND_REPO="https://github.com/Tech-Academy-Obelix/web-frontend"
+BACKEND_DIR="HomeworkPlatform"
+FRONTEND_DIR="web-frontend"
+BACKEND_PID_FILE="platform.pid"
 UDP_PID_FILE="udp_server.pid"
+FRONTEND_PID_FILE="frontend.pid"
 
-if [ -d "$TARGET_DIR" ]; then
-    cd "$TARGET_DIR" || exit
+# Backend
+if [ -d "$BACKEND_DIR" ]; then
+    cd "$BACKEND_DIR" || exit
     git pull origin main
 else
-    git clone "$REPO_URL"
-    cd "$TARGET_DIR" || exit
+    git clone "$BACKEND_REPO"
+    cd "$BACKEND_DIR" || exit
 fi
 
 if [ -f "pom.xml" ]; then
@@ -35,13 +38,28 @@ if [ ! -f "$JAR_FILE" ]; then
 fi
 
 nohup java -jar "$JAR_FILE" > output.log 2>&1 &
-echo $! > "$PID_FILE"
+echo $! > "$BACKEND_PID_FILE"
 
+# UDP Server
 if [ -f "$UDP_PID_FILE" ]; then
     kill $(cat "$UDP_PID_FILE") 2>/dev/null
     rm "$UDP_PID_FILE"
 fi
 
-nohup python3 udp_server.py > udp_server.log 2>&1 &
-echo $! > "$UDP_PID_FILE"
 
+# Frontend
+if [ -d "$FRONTEND_DIR" ]; then
+    cd "$FRONTEND_DIR" || exit
+    git pull origin main
+else
+    git clone "$FRONTEND_REPO"
+    cd "$FRONTEND_DIR" || exit
+fi
+
+if [ -f "package.json" ]; then
+    npm install
+    nohup npm start > frontend.log 2>&1 &
+    echo $! > "../$FRONTEND_PID_FILE"
+else
+    exit 1
+fi
