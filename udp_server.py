@@ -1,10 +1,10 @@
 import socket
 import subprocess
-
+import os
 
 HOST = "0.0.0.0"
 PORT = 12345
-script = "/home/zdravko/PycharmProjects/UDP-SERVER-SCRIPT/restart.sh"
+script = os.path.join(os.path.dirname(__file__), "restart.sh")
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((HOST, PORT))
